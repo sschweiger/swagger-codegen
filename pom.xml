@@ -779,7 +779,7 @@
                 <module>samples/client/petstore/java/jersey1</module>
                 <module>samples/client/petstore/java/jersey2</module>
                 <module>samples/client/petstore/java/okhttp-gson</module>
-                <module>samples/client/petstore/java/resteasy</module>
+                <module>samples/client/petstore/java/resteasy-java8</module>
                 <module>samples/client/petstore/java/retrofit</module>
                 <module>samples/client/petstore/java/retrofit2</module>
                 <module>samples/client/petstore/java/retrofit2rx</module>
