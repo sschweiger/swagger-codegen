@@ -52,6 +52,7 @@ public class JavaClientCodegen extends AbstractJavaCodegen
         supportedLibraries.put("jersey1", "HTTP client: Jersey client 1.19.1. JSON processing: Jackson 2.7.0. Enable Java6 support using '-DsupportJava6=true'.");
         supportedLibraries.put("feign", "HTTP client: Netflix Feign 8.16.0. JSON processing: Jackson 2.7.0");
         supportedLibraries.put("jersey2", "HTTP client: Jersey client 2.22.2. JSON processing: Jackson 2.7.0");
+        supportedLibraries.put("resteasy", "HTTP client: Resteasy Client 3.0.16.Final. JSON processing: Jackson 2.7.0");
         supportedLibraries.put("okhttp-gson", "HTTP client: OkHttp 2.7.5. JSON processing: Gson 2.6.2. Enable Parcelable modles on Android using '-DparcelableModel=true'");
         supportedLibraries.put(RETROFIT_1, "HTTP client: OkHttp 2.7.5. JSON processing: Gson 2.3.1 (Retrofit 1.9.0). IMPORTANT NOTE: retrofit1.x is no longer actively maintained so please upgrade to 'retrofit2' instead.");
         supportedLibraries.put(RETROFIT_2, "HTTP client: OkHttp 3.2.0. JSON processing: Gson 2.6.1 (Retrofit 2.0.2). Enable the RxJava adapter using '-DuseRxJava=true'. (RxJava 1.1.3)");
@@ -171,7 +172,10 @@ public class JavaClientCodegen extends AbstractJavaCodegen
             additionalProperties.put("jackson", "true");
         } else if("jersey1".equals(getLibrary())) {
             additionalProperties.put("jackson", "true");
-        } else {
+        } else if("resteasy".equals(getLibrary())) {
+            supportingFiles.add(new SupportingFile("JSON.mustache", invokerFolder, "JSON.java"));
+            additionalProperties.put("jackson", "true");
+		} else {
             LOGGER.error("Unknown library option (-l/--library): " + getLibrary());
         }
 

@@ -512,13 +512,14 @@ public class ApiClient {
       for (Entry<String, Object> param : formParams.entrySet()) {
         if (param.getValue() instanceof File) {
           File file = (File) param.getValue();
-          try (InputStream stream = new FileInputStream(file)) {
-            multiPart.addFormData("file", stream, MediaType.APPLICATION_OCTET_STREAM_TYPE);
+		  multiPart.addFormData("fileName", file.getName(), MediaType.TEXT_PLAIN_TYPE);
+          try (InputStream stream = new FileInputStream(file)) {        	    
+            multiPart.addFormData("fileContent", stream, MediaType.APPLICATION_OCTET_STREAM_TYPE);
           } catch (IOException e) {
             throw new ApiException("error uploading file");
           }
         } else {
-          multiPart.addFormData(param.getKey(), parameterToString(param.getValue()), MediaType.APPLICATION_OCTET_STREAM_TYPE);
+          multiPart.addFormData(param.getKey(), parameterToString(param.getValue()), MediaType.TEXT_PLAIN_TYPE);
         }
       }
       entity = Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE);
@@ -529,7 +530,7 @@ public class ApiClient {
       }
       entity = Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE);
     } else {
-      // We let jersey handle the serialization
+      // We let resteasy handle the serialization
       entity = Entity.entity(obj, contentType);
     }
     return entity;
@@ -694,32 +695,35 @@ public class ApiClient {
       throw new ApiException(500, "unknown method type " + method);
     }
 
-    statusCode = response.getStatusInfo().getStatusCode();
-    responseHeaders = buildResponseHeaders(response);
-
-    if (response.getStatus() == Status.NO_CONTENT.getStatusCode()) {
-      return null;
-    } else if (response.getStatusInfo().getFamily() == Status.Family.SUCCESSFUL) {
-      if (returnType == null)
+    try {
+      if (response.getStatus() == Status.NO_CONTENT.getStatusCode()) {
         return null;
-      else
-        return deserialize(response, returnType);
-    } else {
-      String message = "error";
-      String respBody = null;
-      if (response.hasEntity()) {
-        try {
-          respBody = String.valueOf(response.readEntity(String.class));
-          message = respBody;
-        } catch (RuntimeException e) {
-          // e.printStackTrace();
+      } else if (response.getStatusInfo().getFamily() == Status.Family.SUCCESSFUL) {
+        if (returnType == null)
+          return null;
+        else
+          return deserialize(response, returnType);
+      } else {
+        String message = "error";
+        String respBody = null;
+        if (response.hasEntity()) {
+          try {
+            respBody = String.valueOf(response.readEntity(String.class));
+            message = respBody;
+          } catch (RuntimeException e) {
+            e.printStackTrace();
+          }
         }
+
+        throw new ApiException(
+		  response.getStatus(), 
+		  message, 
+		  buildResponseHeaders(response), 
+		  respBody
+		);
       }
-      throw new ApiException(
-        response.getStatus(),
-        message,
-        buildResponseHeaders(response),
-        respBody);
+    } finally {
+      response.close();
     }
   }
 
