@@ -11,7 +11,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
+import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataOutput;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,6 +72,11 @@ public class ApiClient {
 
   public ApiClient() {
     json = new JSON();
+	
+	ResteasyProviderFactory instance=ResteasyProviderFactory.getInstance();
+    RegisterBuiltin.register(instance);
+    instance.registerProvider(ResteasyJackson2Provider.class);
+	
     httpClient = buildHttpClient(debugging);
 
     this.dateFormat = new RFC3339DateFormat();
